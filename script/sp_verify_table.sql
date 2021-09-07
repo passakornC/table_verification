@@ -159,6 +159,21 @@ BEGIN
     ORDER BY compare_result DESC, a.column_comment;
     -- compare with design
 
+    -- compare default value
+    SELECT c.table_schema,
+           m.a_table_name   AS 'design_table_name',
+           m.a_column_name  AS 'design_column_name',
+           m.default_value  AS 'design_default',
+           c.column_default AS 'impl_default'
+    FROM mfoa_table_spec m
+             LEFT JOIN information_schema.columns c ON m.a_table_name = c.table_name AND m.a_column_name = c.column_name
+    WHERE table_schema = p_schema_name
+      AND table_name = p_table_name
+      AND c.column_name NOT IN
+          ('updated_by', 'updated_date_time', 'created_by', 'created_date_time')
+    ORDER BY m.default_value DESC, c.column_default DESC, m.a_column_name;
+    -- compare default value
+
 
 END //
 
