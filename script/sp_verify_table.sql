@@ -153,8 +153,8 @@ BEGIN
            IF(a.column_name = b.a_column_name, '', 'DIFF') AS 'compare_result'
     FROM information_schema.columns a
              LEFT JOIN mfoa_table_spec b ON a.table_name = b.a_table_name AND a.column_name = b.a_column_name
-    WHERE a.table_schema = 'main'
-      AND a.table_name = 'tbl_fund_profile'
+    WHERE a.table_schema = p_schema_name
+      AND a.table_name = p_table_name
       AND a.column_name NOT IN ('updated_by', 'updated_date_time', 'created_by', 'created_date_time')
     ORDER BY compare_result DESC, a.column_comment;
     -- compare with design
