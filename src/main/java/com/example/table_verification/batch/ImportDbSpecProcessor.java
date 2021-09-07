@@ -21,7 +21,7 @@ public class ImportDbSpecProcessor implements ItemProcessor<TextFileModel, Table
         result.setIsUnique(textFileModel.getIsUnique().compareToIgnoreCase("u") == 0);
         result.setIsIndex(textFileModel.getIsIndex().compareToIgnoreCase("i") == 0);
         result.setIsAutoIncrement(textFileModel.getIsAutoIncrement().compareToIgnoreCase("a") == 0);
-        result.setDefaultValue(textFileModel.getDefaultValue().toLowerCase());
+        result.setDefaultValue(textFileModel.getDefaultValue().trim().isBlank() ? null : textFileModel.getDefaultValue().trim());
 
         // de component data typeBook3.csv
         String item = textFileModel.getDataType().trim().toLowerCase();
