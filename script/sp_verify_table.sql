@@ -1,6 +1,5 @@
-DELIMITER //
-
-CREATE PROCEDURE verify_table(IN p_schema_name VARCHAR(255), IN p_table_name VARCHAR(255))
+CREATE
+    DEFINER = root@`%` PROCEDURE verify_table(IN p_schema_name VARCHAR(255), IN p_table_name VARCHAR(255))
 BEGIN
     -- main: design
     -- compare column
@@ -65,11 +64,12 @@ BEGIN
                                                             s.column_name
                                             FROM information_schema.statistics s
                                                      INNER JOIN information_schema.table_constraints tc
-                                                                ON s.table_schema = tc.table_schema AND s.table_name = tc.table_name
+                                                                ON s.table_schema = tc.table_schema AND
+                                                                   s.table_name = tc.table_name AND
+                                                                   tc.constraint_type = 'PRIMARY KEY'
                                             WHERE s.table_schema = p_schema_name
                                               AND s.table_name = p_table_name
-                                              AND s.non_unique = FALSE
-                                              AND tc.constraint_type = 'PRIMARY KEY') AS temp1
+                                              AND s.index_name = 'PRIMARY') AS temp1
                                            ON c.table_schema = temp1.table_schema AND
                                               c.table_name = temp1.table_name AND
                                               c.column_name = temp1.column_name
@@ -100,20 +100,21 @@ BEGIN
                                                             s.column_name
                                             FROM information_schema.statistics s
                                                      INNER JOIN information_schema.table_constraints tc
-                                                                ON s.table_schema = tc.table_schema AND s.table_name = tc.table_name
-                                            WHERE s.table_schema = p_schema_name
-                                              AND s.table_name = p_table_name
-                                              AND s.non_unique = FALSE
-                                              AND tc.constraint_type = 'UNIQUE') AS temp1
+                                                                ON s.table_schema = tc.table_schema AND
+                                                                   s.table_name = tc.table_name AND
+                                                                   tc.constraint_type = 'UNIQUE'
+                                            WHERE s.table_schema = @p_schema_name
+                                              AND s.table_name = @p_table_name
+                                              AND s.index_name <> 'PRIMARY') AS temp1
                                            ON c.table_schema = temp1.table_schema AND
                                               c.table_name = temp1.table_name AND
                                               c.column_name = temp1.column_name
-                        WHERE c.table_schema = p_schema_name
-                          AND c.table_name = p_table_name
+                        WHERE c.table_schema = @p_schema_name
+                          AND c.table_name = @p_table_name
                           AND c.column_name NOT IN
                               ('updated_by', 'updated_date_time', 'created_by', 'created_date_time')) AS temp1
                        ON m.a_table_name = temp1.table_name AND m.a_column_name = temp1.column_name
-    WHERE m.a_table_name = p_table_name
+    WHERE m.a_table_name = @p_table_name
     ORDER BY compare_result DESC, design_unique DESC;
     -- compare UNIQUE
 
@@ -175,11 +176,5 @@ BEGIN
     -- compare default value
 
 
-END //
-
-DELIMITER ;
-
-# DROP PROCEDURE verify_table;
-
-
+END;
 
