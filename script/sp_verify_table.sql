@@ -103,18 +103,18 @@ BEGIN
                                                                 ON s.table_schema = tc.table_schema AND
                                                                    s.table_name = tc.table_name AND
                                                                    tc.constraint_type = 'UNIQUE'
-                                            WHERE s.table_schema = @p_schema_name
-                                              AND s.table_name = @p_table_name
+                                            WHERE s.table_schema = p_schema_name
+                                              AND s.table_name = p_table_name
                                               AND s.index_name <> 'PRIMARY') AS temp1
                                            ON c.table_schema = temp1.table_schema AND
                                               c.table_name = temp1.table_name AND
                                               c.column_name = temp1.column_name
-                        WHERE c.table_schema = @p_schema_name
-                          AND c.table_name = @p_table_name
+                        WHERE c.table_schema = p_schema_name
+                          AND c.table_name = p_table_name
                           AND c.column_name NOT IN
                               ('updated_by', 'updated_date_time', 'created_by', 'created_date_time')) AS temp1
                        ON m.a_table_name = temp1.table_name AND m.a_column_name = temp1.column_name
-    WHERE m.a_table_name = @p_table_name
+    WHERE m.a_table_name = p_table_name
     ORDER BY compare_result DESC, design_unique DESC;
     -- compare UNIQUE
 
