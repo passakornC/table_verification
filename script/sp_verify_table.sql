@@ -92,23 +92,23 @@ BEGIN
     FROM mfoa_table_spec m
              LEFT JOIN (SELECT DISTINCT c.table_name,
                                         c.column_name,
-                                        IF(temp1.constraint_type = 'UNIQUE', TRUE, FALSE) AS 'is_unique'
+                                        IF(temp2.constraint_type = 'UNIQUE', TRUE, FALSE) AS 'is_unique'
                         FROM information_schema.columns c
-                                 LEFT JOIN (SELECT DISTINCT s.table_schema,
-                                                            s.table_name,
-                                                            tc.constraint_type,
-                                                            s.column_name
+                                 LEFT JOIN (SELECT s.table_schema, s.table_name, s.column_name, tc1.constraint_type
                                             FROM information_schema.statistics s
-                                                     INNER JOIN information_schema.table_constraints tc
-                                                                ON s.table_schema = tc.table_schema AND
-                                                                   s.table_name = tc.table_name AND
-                                                                   tc.constraint_type = 'UNIQUE'
+                                                     INNER JOIN (SELECT *
+                                                                 FROM information_schema.table_constraints tc
+                                                                 WHERE tc.table_schema = p_schema_name
+                                                                   AND tc.table_name = p_table_name
+                                                                   AND tc.constraint_type = 'UNIQUE') AS tc1
+                                                                ON s.table_schema = tc1.table_schema AND
+                                                                   s.table_name = tc1.table_name AND
+                                                                   s.index_name = tc1.constraint_name
                                             WHERE s.table_schema = p_schema_name
-                                              AND s.table_name = p_table_name
-                                              AND s.index_name <> 'PRIMARY') AS temp1
-                                           ON c.table_schema = temp1.table_schema AND
-                                              c.table_name = temp1.table_name AND
-                                              c.column_name = temp1.column_name
+                                              AND s.table_name = p_table_name) AS temp2
+                                           ON c.table_schema = temp2.table_schema AND
+                                              c.table_name = temp2.table_name AND
+                                              c.column_name = temp2.column_name
                         WHERE c.table_schema = p_schema_name
                           AND c.table_name = p_table_name
                           AND c.column_name NOT IN
